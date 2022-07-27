@@ -1,0 +1,112 @@
+plugins {
+    id 'java-library'
+    id 'idea'
+    id 'maven-publish'
+    id 'signing'
+
+    id "io.spring.dependency-management" version "1.0.12.RELEASE"
+    // lombok
+    id 'io.freefair.lombok' version '6.5.0.3'
+}
+
+apply from: System.getProperty("user.home") + '/Github/LayGit/publish.gradle'
+
+group 'com.laylib'
+version '1.0.0'
+
+repositories {
+    maven{ url 'https://maven.aliyun.com/nexus/content/groups/public/'}
+    mavenCentral()
+    maven { url 'https://oss.sonatype.org/content/groups/public/' }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.boot:spring-boot-dependencies:2.1.7.RELEASE")
+    }
+}
+
+dependencies {
+    // intl
+    implementation("com.laylib:jIntl:${project.version}") {
+        exclude group: 'org.apache.commons', module: 'commons-lang3'
+    }
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.springframework.boot:spring-boot-autoconfigure-processor'
+
+    // utils
+    implementation 'commons-beanutils:commons-beanutils:1.9.4'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            pom {
+                name = 'jIntl-spring-boot-starter'
+                description = 'SpringBoot Starter for jIntl'
+                url = 'https://jintl.laylib.com'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        name = 'Lay'
+                        email = 'jserlay@gmail.com'
+                    }
+                }
+
+                scm {
+                    url = 'https://github.com/LayGit/jIntl-spring-boot-starter'
+                    connection = 'scm:git:git://github.com/LayGit/jIntl-spring-boot-starter.git'
+                    developerConnection = 'scm:git:ssh://git@github.com:LayGit/jIntl-spring-boot-starter.git'
+                }
+
+                withXml {
+                    asNode().dependencies.'*'.findAll() {
+                        it.scope.text() == 'runtime' && project.configurations.runtimeClasspath.allDependencies.find { dep ->
+                            dep.name == it.artifactId.text()
+                        }
+                    }.each() {
+                        it.scope*.value = 'compile'
+                    }
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username sonatypeUsername
+                password sonatypePassword
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
+
+javadoc {
+    options.addStringOption("charset", "UTF-8")
+}
