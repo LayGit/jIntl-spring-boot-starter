@@ -1,15 +1,16 @@
 package com.laylib.jintl.starter;
 
+import com.laylib.jintl.starter.annotation.MessageConfigScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * SpringBoot
+ * SpringBoot Application
  *
  * @author Lay
- * @date 2022/7/27
  */
 @SpringBootApplication
+@MessageConfigScan(basePackages = "com.laylib.jintl.others")
 public class IntlApplication {
     public static void main(String[] args) {
         SpringApplication.run(IntlApplication.class);

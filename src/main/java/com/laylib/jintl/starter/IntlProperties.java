@@ -1,20 +1,17 @@
 package com.laylib.jintl.starter;
 
-import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 import java.util.Map;
 
 /**
- * intl config
+ * jIntl config properties
  *
  * @author Lay
- * @since 1.0.0
  */
-@Data
-@Configuration
 @ConfigurationProperties(prefix = "intl")
+@ConfigurationPropertiesScan
 public class IntlProperties {
     /**
      * is return code when message is null
@@ -24,17 +21,36 @@ public class IntlProperties {
     /**
      * is fallback to Locale without country
      */
-    private boolean fallbackLanguageOny;
-
-    /**
-     * source charset
-     */
-    private String charset;
+    private boolean fallbackLanguageOnly;
 
     /**
      * provider
      */
     private Provider provider;
+
+    public boolean isUseCodeAsDefaultMessage() {
+        return useCodeAsDefaultMessage;
+    }
+
+    public void setUseCodeAsDefaultMessage(boolean useCodeAsDefaultMessage) {
+        this.useCodeAsDefaultMessage = useCodeAsDefaultMessage;
+    }
+
+    public boolean isFallbackLanguageOnly() {
+        return fallbackLanguageOnly;
+    }
+
+    public void setFallbackLanguageOnly(boolean fallbackLanguageOnly) {
+        this.fallbackLanguageOnly = fallbackLanguageOnly;
+    }
+
+    public Provider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(Provider provider) {
+        this.provider = provider;
+    }
 
     public static class Provider {
         /**

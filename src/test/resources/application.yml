@@ -1,5 +1,3 @@
 intl:
   provider:
-    type: local
-    config:
-      localResources: true
+    type: test

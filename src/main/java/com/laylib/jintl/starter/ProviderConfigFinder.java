@@ -1,67 +1,76 @@
 package com.laylib.jintl.starter;
 
-import com.laylib.jintl.config.AbstractProviderConfig;
+import com.laylib.jintl.config.BaseProviderConfig;
 import com.laylib.jintl.starter.exception.ProviderConfigNotFoundException;
-import org.apache.commons.beanutils.BeanUtils;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.env.Environment;
+import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.util.ClassUtils;
+import org.springframework.core.type.filter.TypeFilter;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 /**
- * provider config finder
+ * Message Provider Finder
  *
  * @author Lay
- * @since 1.0.0
  */
 public class ProviderConfigFinder {
+    private static final Set<String> scanPackages = new HashSet<>();
 
-    @SuppressWarnings("unchecked")
-    public static AbstractProviderConfig find(String packageName, IntlProperties.Provider provider) throws ProviderConfigNotFoundException {
-        AbstractProviderConfig instance;
+    static {
+        scanPackages.add(BaseProviderConfig.class.getPackageName());
+    }
+
+    public static void addPackages(Set<String> packages) {
+        scanPackages.addAll(packages);
+    }
+
+    public static BaseProviderConfig find(Environment env) {
+        String type = env.getProperty("intl.provider.type");
         try {
-            List<Class<?>> lstClass = getClasspath(packageName);
-            for (Class<?> cls : lstClass) {
-                if (AbstractProviderConfig.class.isAssignableFrom(cls) && !Modifier.isAbstract(cls.getModifiers())) {
-                    instance = (AbstractProviderConfig) cls.getDeclaredConstructor().newInstance();
-                    if (provider.getType().equals(instance.getType())) {
-                        // fill config props
-                        Map<String, Object> config = provider.getConfig();
-                        if (config != null && config.size() > 0) {
-                            BeanUtils.populate(instance, config);
-                        }
+            if (type == null) {
+                throw new NullPointerException();
+            }
 
-                        return instance;
-                    }
+            List<BeanDefinition> beans = getBeanDefinitions();
+            BaseProviderConfig instance;
+            for (BeanDefinition bean : beans) {
+                instance = (BaseProviderConfig) Class.forName(bean.getBeanClassName()).getDeclaredConstructor().newInstance();
+                if (type.equals(instance.getType())) {
+                    Binder binder = Binder.get(env);
+                    return binder.bind("intl.provider", instance.getClass()).get();
                 }
             }
         } catch (Exception e) {
-            throw new ProviderConfigNotFoundException(provider.getType(), e);
+            throw new ProviderConfigNotFoundException(type, e);
         }
 
-        throw new ProviderConfigNotFoundException(provider.getType(), new Throwable("no class defined"));
+        throw new ProviderConfigNotFoundException(type, null);
     }
 
-    public static List<Class<?>> getClasspath(String packagePath) throws Exception {
-        ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
-        MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resourcePatternResolver);
-        // 加载系统所有类资源
-        Resource[] resources = resourcePatternResolver.getResources("classpath*:" + packagePath.replaceAll("[.]", "/") + "/**/*.class");
-        List<Class<?>> list = new ArrayList<Class<?>>();
-        // 把每一个class文件找出来
-        for (Resource r : resources) {
-            MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(r);
-            Class<?> clazz = ClassUtils.forName(metadataReader.getClassMetadata().getClassName(), null);
-            list.add(clazz);
+    public static List<BeanDefinition> getBeanDefinitions()  {
+        LinkedHashSet<BeanDefinition> candidateComponents = new LinkedHashSet<>();
+        // scan provider classes
+        ClassPathScanningCandidateComponentProvider pathScanningCandidateComponentProvider = new ClassPathScanningCandidateComponentProvider(false);
+        pathScanningCandidateComponentProvider.addIncludeFilter(new ProviderConfigFilter());
+        for (String basePackage : scanPackages) {
+            candidateComponents.addAll(pathScanningCandidateComponentProvider.findCandidateComponents(basePackage));
         }
-        return list;
+
+        return new ArrayList<>(candidateComponents);
+    }
+
+
+    static class ProviderConfigFilter implements TypeFilter {
+        @Override
+        public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
+            ClassMetadata metadata = metadataReader.getClassMetadata();
+            return BaseProviderConfig.class.getName().equals(metadata.getSuperClassName());
+        }
     }
 }
