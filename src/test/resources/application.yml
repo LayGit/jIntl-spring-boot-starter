@@ -1,3 +1,5 @@
 intl:
+  useCodeAsDefaultMessage: true
   provider:
     type: test
+    sourceNameFormatterClass: "com.laylib.jintl.formatter.CustomSourceNameFormatter"

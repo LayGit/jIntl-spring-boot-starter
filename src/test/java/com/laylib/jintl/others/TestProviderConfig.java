@@ -17,6 +17,6 @@ public class TestProviderConfig extends BaseProviderConfig {
 
     @Override
     public Class<? extends AbstractMessageProvider<? extends BaseProviderConfig>> getProviderClass() {
-        return (Class<? extends AbstractMessageProvider<? extends BaseProviderConfig>>) new DefaultMessageProvider<>(new TestProviderConfig()).getClass();
+        return DefaultMessageProvider.class;
     }
 }
