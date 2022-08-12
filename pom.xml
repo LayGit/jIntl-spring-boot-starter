@@ -10,8 +10,8 @@
     <packaging>jar</packaging>
 
     <url>https://jintl.laylib.com</url>
-    <name>jIntl</name>
-    <description>jIntl Spring Boot Stater</description>
+    <name>jIntl SpringBoot Starter</name>
+    <description>jIntl with Spring Boot Stater</description>
 
     <licenses>
         <license>

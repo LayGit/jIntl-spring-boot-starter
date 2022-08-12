@@ -1,10 +1,12 @@
 package com.laylib.jintl.starter;
 
+import com.laylib.jintl.annotation.ProviderType;
 import com.laylib.jintl.config.BaseProviderConfig;
 import com.laylib.jintl.starter.exception.ProviderConfigNotFoundException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
@@ -38,12 +40,12 @@ public class ProviderConfigFinder {
             }
 
             List<BeanDefinition> beans = getBeanDefinitions();
-            BaseProviderConfig instance;
+
             for (BeanDefinition bean : beans) {
-                instance = (BaseProviderConfig) Class.forName(bean.getBeanClassName()).getDeclaredConstructor().newInstance();
-                if (type.equals(instance.getType())) {
+                ProviderType providerType = AnnotationUtils.findAnnotation(Class.forName(bean.getBeanClassName()), ProviderType.class);
+                if (providerType != null && type.equals(providerType.value())) {
                     Binder binder = Binder.get(env);
-                    return binder.bind("intl.provider", instance.getClass()).get();
+                    return (BaseProviderConfig) binder.bind("intl.provider", Class.forName(bean.getBeanClassName())).get();
                 }
             }
         } catch (Exception e) {
