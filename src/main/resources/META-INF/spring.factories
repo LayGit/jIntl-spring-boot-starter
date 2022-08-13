@@ -1,1 +1,1 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.laylib.jintl.starter.IntlAutoConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.laylib.jintl.boot.autoconfigure.IntlAutoConfiguration

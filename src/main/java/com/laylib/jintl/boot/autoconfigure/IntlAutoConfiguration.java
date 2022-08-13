@@ -1,6 +1,8 @@
-package com.laylib.jintl.starter;
+package com.laylib.jintl.boot.autoconfigure;
 
 import com.laylib.jintl.IntlSource;
+import com.laylib.jintl.boot.context.IntlSourceHolder;
+import com.laylib.jintl.boot.utils.ProviderConfigFinder;
 import com.laylib.jintl.config.BaseProviderConfig;
 import com.laylib.jintl.config.IntlConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,10 @@ public class IntlAutoConfiguration {
 
         // resolve provider config
         BaseProviderConfig providerConfig = ProviderConfigFinder.find(env);
-        return new IntlSource(config, providerConfig);
+        IntlSource intlSource =  new IntlSource(config, providerConfig);
+
+        // static cached to holder
+        IntlSourceHolder.init(intlSource);
+        return intlSource;
     }
 }

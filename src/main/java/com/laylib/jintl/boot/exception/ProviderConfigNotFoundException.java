@@ -1,4 +1,4 @@
-package com.laylib.jintl.starter.exception;
+package com.laylib.jintl.boot.exception;
 
 /**
  * provider config not found

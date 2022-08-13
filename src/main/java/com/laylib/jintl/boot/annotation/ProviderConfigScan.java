@@ -1,4 +1,4 @@
-package com.laylib.jintl.starter.annotation;
+package com.laylib.jintl.boot.annotation;
 
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;
@@ -13,8 +13,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Documented
-@Import(MessageConfigScannerRegistrar.class)
-public @interface MessageConfigScan {
+@Import(ProviderConfigScannerRegistrar.class)
+public @interface ProviderConfigScan {
     @AliasFor("basePackages")
     String[] value() default {};
 

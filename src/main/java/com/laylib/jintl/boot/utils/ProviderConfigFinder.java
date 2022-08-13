@@ -1,8 +1,9 @@
-package com.laylib.jintl.starter;
+package com.laylib.jintl.boot.utils;
 
 import com.laylib.jintl.annotation.ProviderType;
+import com.laylib.jintl.boot.exception.ProviderConfigNotFoundException;
 import com.laylib.jintl.config.BaseProviderConfig;
-import com.laylib.jintl.starter.exception.ProviderConfigNotFoundException;
+import com.laylib.jintl.config.LocalProviderConfig;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -13,7 +14,6 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -36,7 +36,7 @@ public class ProviderConfigFinder {
         String type = env.getProperty("intl.provider.type");
         try {
             if (type == null) {
-                throw new NullPointerException();
+                return new LocalProviderConfig();
             }
 
             List<BeanDefinition> beans = getBeanDefinitions();
@@ -70,7 +70,7 @@ public class ProviderConfigFinder {
 
     static class ProviderConfigFilter implements TypeFilter {
         @Override
-        public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
+        public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) {
             ClassMetadata metadata = metadataReader.getClassMetadata();
             return BaseProviderConfig.class.getName().equals(metadata.getSuperClassName());
         }

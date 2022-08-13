@@ -1,4 +1,4 @@
-package com.laylib.jintl.starter;
+package com.laylib.jintl.boot.autoconfigure;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
